@@ -11,27 +11,27 @@
 
 /* Defined Constants */
 
-#define TYPE_VOID			0
-#define TYPE_INTEGER		1
-#define TYPE_STRING			2
-#define TYPE_INT_ARRAY		3
-#define TYPE_USER_TYPE		4
-#define TYPE_VOID_POINTER	5
-#define TYPE_UNKNOWN		6
+#define TYPE_VOID               0
+#define TYPE_INTEGER            1
+#define TYPE_STRING             2
+#define TYPE_INT_ARRAY          3
+#define TYPE_USER_TYPE          4
+#define TYPE_VOID_POINTER       5
+#define TYPE_UNKNOWN            6
 
 /* Data Structures */
 
 typedef struct USERTYPE
 {
-	const char* named;
-	/*MEMBERLIST* data;*/
-	void*		data;
+  const char* named;
+  /*MEMBERLIST* data;*/
+  void*   data;
 } USERTYPE;
 
 typedef struct TYPE {
-	unsigned int size;
-	unsigned int basic;
-	/*USERTYPE* user;*/
+  unsigned int size;
+  unsigned int basic;
+  /*USERTYPE* user;*/
 } TYPE;
 
 /* Code Analysis */

@@ -62,16 +62,16 @@ functionX(arg1 : int, arg2 : int[]) : int
 main : void {
 printf("%s is running its %ist program.", "Static Duck", 1);
 if (1) a; else if (2) b; else c;
-	if (1) 
-		if (2) 
-			if (3) {
-				if (4) d; else g;
-			} //else 
-			//	e; 
-		else 
-			f; 
-	else 
-		g;// else h;
+    if (1) 
+        if (2) 
+            if (3) {
+                if (4) d; else g;
+            } //else 
+            //    e; 
+        else 
+            f; 
+    else 
+        g;// else h;
 }
 
 x: int;
@@ -88,12 +88,12 @@ x,y,z : int[]
 
 
 q : int { if (a) 
-	if (b) 
-		if (c) {c;} 
-		else 
-			if (d) {d;} 
-			else {d;}
-	else {b;} 
+    if (b) 
+        if (c) {c;} 
+        else 
+            if (d) {d;} 
+            else {d;}
+    else {b;} 
 else {a;} }
 
 

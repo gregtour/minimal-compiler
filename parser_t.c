@@ -3,19 +3,19 @@
 
 /* Grammar Symbols */
 char GRAMMAR_SYMBOLS[203] =
-    "<program>\0<gstmt*>\0<gstmt>\0<string-list>\0<ty"
-    "pe-declaration>\0<type>\0<block>\0<param*>\0<fstm"
-    "t>\0<fstmt*>\0<expr>\0<else>\0<arg*>\0<condition>\0"
-    "<logic>\0<comparison>\0<arithmetic>\0<term>\0<fac"
-    "tor>\0<final>\0<boolean>\0";
+    "<program>\0<gstmt*>\0<gstmt>\0<string-list>\0<type"
+    "-declaration>\0<type>\0<block>\0<param*>\0<fstmt>\0"
+    "<fstmt*>\0<expr>\0<else>\0<arg*>\0<condition>\0"
+    "<logic>\0<comparison>\0<arithmetic>\0<term>\0"
+    "<factor>\0<final>\0<boolean>\0";
 
 /* Grammar Tokens */
 char GRAMMAR_TOKENS[194] =
-    "<epsilon>\0<$>\0<endl>\0<integer>\0<float>\0<stri"
-    "ng>\0<identifier>\0include\0;\0,\0:\0(\0)\0{\0}\0int\0st"
-    "ring\0[\0]\0void\0=\0if\0else\0while\0return\0break\0co"
-    "ntinue\0and\0or\0not\0==\0!=\0<\0>\0<=\0>=\0+\0-\0*\0/\0mod"
-    "\0!\0true\0false\0";
+    "<epsilon>\0<$>\0<endl>\0<integer>\0<float>\0<string>\0"
+    "<identifier>\0include\0;\0,\0:\0(\0)\0{\0}\0int\0string"
+    "\0[\0]\0void\0=\0if\0else\0while\0return\0break\0continue"
+    "\0and\0or\0not\0==\0!=\0<\0>\0<=\0>=\0+\0-\0*\0/\0mod\0"
+    "!\0true\0false\0";
 
 
 /* Rule Right Hand Sides */

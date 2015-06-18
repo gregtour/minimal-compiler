@@ -8,13 +8,13 @@
 #ifdef _DEBUG
 void ClAssert(unsigned int condition, const char* message, const char* source, int lineNumber)
 {
-	if (!condition)
-	{
-		printf("\nAssert failed %s:%i.\n", source, lineNumber);
-		if (message) { printf("Error: %s\n\n", message); }
-		getchar();
-		exit(0);
-	}
+    if (!condition)
+    {
+        printf("\nAssert failed %s:%i.\n", source, lineNumber);
+        if (message) { printf("Error: %s\n\n", message); }
+        getchar();
+        exit(0);
+    }
 }
 #endif
 
@@ -41,12 +41,12 @@ int TestParser(const char* program)
     PrintLexing(lexing);
 
 #ifdef USE_COMPRESSED_TABLES
-	DecompressAndPatchParseTable(&PARSE_TABLE, 
-		COMPRESSED_GOTO_TABLE, sizeof(COMPRESSED_GOTO_TABLE)/sizeof(int),
-		COMPRESSED_ACTION_TABLE, sizeof(COMPRESSED_ACTION_TABLE)/sizeof(int));
+    DecompressAndPatchParseTable(&PARSE_TABLE, 
+        COMPRESSED_GOTO_TABLE, sizeof(COMPRESSED_GOTO_TABLE)/sizeof(int),
+        COMPRESSED_ACTION_TABLE, sizeof(COMPRESSED_ACTION_TABLE)/sizeof(int));
 #endif
 
-	// parse source
+    // parse source
     syntax = ParseSource(lexing, PARSE_TABLE, CONTEXT_FREE_GRAMMAR);
     if (syntax == NULL)
     {
@@ -54,24 +54,24 @@ int TestParser(const char* program)
         FreeLexing(lexing, buffer);
         return 4;
     }
-	
-	// preprocessor
-	PrePassReductions(&syntax);
-	PrintParseTree(syntax, CONTEXT_FREE_GRAMMAR);
+    
+    // preprocessor
+    PrePassReductions(&syntax);
+    PrintParseTree(syntax, CONTEXT_FREE_GRAMMAR);
 
-	// compilation stage 1
-	SourceReductions(&syntax);
-	StaticAnalysis(syntax);
+    // compilation stage 1
+    SourceReductions(&syntax);
+    StaticAnalysis(syntax);
 
-	// done for now
+    // done for now
     printf("Success.\n");
     FreeLexing(lexing, buffer);
     FreeParseTree(syntax);
 
 #ifdef USE_COMPRESSED_TABLES
-	// free uncompressed parse tables
-	free(PARSE_TABLE.gotoTable);
-	free(PARSE_TABLE.actionTable);
+    // free uncompressed parse tables
+    free(PARSE_TABLE.gotoTable);
+    free(PARSE_TABLE.actionTable);
 #endif
 
     getchar();
@@ -83,8 +83,9 @@ int main(int argc, char** argv)
 {
     /* int           error; */
 
-	TestParser("static-test.txt");
+    TestParser("static-test.txt");
     getchar();
 
     return 0;
 }
+
