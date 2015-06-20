@@ -4,9 +4,18 @@
 #include "compiler.h"
 #include "language.h"
 
+// compiler errors
+int compiler_error_count = 0;
+void CLError(const char* message, const char* source, int lineNumber)
+{
+    compiler_error_count++;
+    printf("Compiler Error %i: ", compiler_error_count);
+    printf("%s [%s, %i]\n", message, source, lineNumber);
+}
+
 // debug assertions
 #ifdef _DEBUG
-void ClAssert(unsigned int condition, const char* message, const char* source, int lineNumber)
+void CLAssert(unsigned int condition, const char* message, const char* source, int lineNumber)
 {
     if (!condition)
     {
@@ -68,6 +77,9 @@ int TestParser(const char* program)
     FreeLexing(lexing, buffer);
     FreeParseTree(syntax);
 
+    // free compiler data structures
+    FreeCompiler();
+
 #ifdef USE_COMPRESSED_TABLES
     // free uncompressed parse tables
     free(PARSE_TABLE.gotoTable);
@@ -78,12 +90,41 @@ int TestParser(const char* program)
     return 0;
 }
 
+// memory management
+void FreeCompiler()
+{
+    // free compiler data structures
+    FreeVariableList(&gPrgrmVariables);
+    FreeFunctionList(&gPrgrmFunctions);
+    FreeSourceList(&gPrgrmSources);
+
+    // zero the pointer handles
+    gPrgrmVariables = NULL;
+    gPrgrmFunctions = NULL;
+    gPrgrmSources = NULL;
+
+    // clear the function table
+    if (gPrgrmFunctionTable) 
+    {
+        unsigned int i;
+        for (i = 0; i < gPrgrmFunctionCount; i++)
+        {
+            FreeVariableList(&gPrgrmFunctionTable[i].locals);
+        }
+
+        free(gPrgrmFunctionTable);
+        gPrgrmFunctionTable = NULL;
+        gPrgrmFunctionTable = 0;
+    }
+}
+
 // compiler frontend
 int main(int argc, char** argv)
 {
     /* int           error; */
 
-    TestParser("static-test.txt");
+    TestParser("program.txt");
+    //TestParser("static-test.txt");
     getchar();
 
     return 0;

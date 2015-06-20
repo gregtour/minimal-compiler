@@ -12,20 +12,21 @@ void PrePassReductions(SYNTAX_TREE** root)
 
 void SourceReductions(SYNTAX_TREE** root)
 {
-    /* any optimizations prior to converting source code to
-       an intermediate representation */
+    // any optimizations prior to converting source code to
+    // an intermediate representation 
     // remove unused local variables
     // convert all references to lexical address form
 }
 
 void StaticAnalysis(SYNTAX_TREE* root)
 {
-    FirstPassStaticAnalyzer(root);
-    SecondPassStaticAnalysis();
+    FirstPassStaticAnalyzer((PROGRAM*)root);
+    SecondPassStaticAnalysis(gPrgrmSources, gPrgrmFunctions, gPrgrmVariables);
     ThirdPassStaticAnalysis();
 }
 
-void FirstPassStaticAnalyzer(SYNTAX_TREE* root)
+// Builds tables of functions and global variables
+void FirstPassStaticAnalyzer(PROGRAM* root)
 {
     Assert(root != NULL);
     Assert(root->token == SYMBOL_PROGRAM);
@@ -33,7 +34,7 @@ void FirstPassStaticAnalyzer(SYNTAX_TREE* root)
     Assert(root->numChildren == 1);
 
     // Analyze all top-level declarations of functions and variables
-    SYNTAX_TREE* iterator = root->children[0];
+    GSTMT_LIST* iterator = root->children[0];
 
     // Iterate through the list of <gstmt>'s.
     while (iterator && iterator->production == PROD_GSTMT_STAR_GSTMT)
@@ -41,8 +42,8 @@ void FirstPassStaticAnalyzer(SYNTAX_TREE* root)
         Assert(iterator->token == SYMBOL_GSTMT_STAR);
         Assert(iterator->numChildren == 2);
 
-        SYNTAX_TREE* statement;
-        statement = iterator->children[0];
+        GSTMT* statement;
+        statement = (GSTMT*)iterator->children[0];
 
         Assert(statement != NULL);
         Assert(statement->token == SYMBOL_GSTMT);
@@ -87,7 +88,7 @@ void FirstPassStaticAnalyzer(SYNTAX_TREE* root)
 
             // (A) <type-declaration> ::= <identifier> : <type>
             // (B) <type-declaration> ::= <identifier> , <type-declaration>
-            SYNTAX_TREE* typeTag = declaration->children[2];
+            TYPE_DECL* typeTag = (TYPE_DECL*)declaration->children[2];
 
             while (typeTag->token != SYMBOL_TYPE) 
             {
@@ -110,6 +111,8 @@ void FirstPassStaticAnalyzer(SYNTAX_TREE* root)
             }
         case PROD_GSTMT_IDENTIFIER_A:
             {
+            Assert(statement->numChildren == 4);
+
             // <gstmt> ::= <identifier> : <type> <block>
             const char* funcName = statement->children[0]->string;
             TYPE returnType = DeriveType(statement->children[2]);
@@ -121,6 +124,8 @@ void FirstPassStaticAnalyzer(SYNTAX_TREE* root)
             }
         case PROD_GSTMT_IDENTIFIER_B:
             {
+            Assert(statement->numChildren == 7);
+
             // <gstmt> ::= <identifier> ( <param*> ) : <type> <block>
             const char* funcName = statement->children[0]->string;
             SYNTAX_TREE* params = statement->children[2];
@@ -133,7 +138,8 @@ void FirstPassStaticAnalyzer(SYNTAX_TREE* root)
             break;
             }
         default:
-            CompilerError("Unrecognized instruction.");
+            AssertS(0, "Unrecognized instruction encountered.");
+            CompilerError("Unknown instruction.");
             break;
         }
 
@@ -142,9 +148,61 @@ void FirstPassStaticAnalyzer(SYNTAX_TREE* root)
     }
 }
 
-void SecondPassStaticAnalysis()
-{
+// data
+unsigned int    gPrgrmFunctionCount = 0;
+FUNC_SEGMENT*   gPrgrmFunctionTable = NULL;
 
+// Processes function statements in body
+void SecondPassStaticAnalysis(SOURCE* sources, FUNCTION* functions, VARLIST* variables)
+{
+    FUNCTION* iterator;
+    unsigned int funcIndex;
+
+    // allocate data table
+    gPrgrmFunctionCount = FunctionCount(functions);
+    gPrgrmFunctionTable = (FUNC_SEGMENT*)malloc(gPrgrmFunctionCount * sizeof(FUNC_SEGMENT));
+
+    AssertS(gPrgrmFunctionCount > 0, "Program contains no functions.");
+
+    memset((void*)gPrgrmFunctionTable, 0, sizeof(FUNC_SEGMENT) * gPrgrmFunctionCount);
+
+    // process each function
+    iterator = functions;
+    funcIndex = 0;
+    while (iterator)
+    {
+        Assert(funcIndex == iterator->index);
+
+        SYNTAX_BLOCK* block = iterator->block;
+
+        // set function header properly
+        gPrgrmFunctionTable[funcIndex].locals = NULL;
+        gPrgrmFunctionTable[funcIndex].params = iterator->parameters;
+        gPrgrmFunctionTable[funcIndex].returnType = iterator->type;
+
+        // step zero, create local variable list
+        ProcessCodeBlock(block, CreateLocalVariables, (void*)&gPrgrmFunctionTable[funcIndex]);
+
+        // step one, perform type-checking on all statements
+        gPrgrmFunctionTable[funcIndex].isInLoop = 0;
+        ProcessCodeBlock(block, StaticTypeChecking, (void*)&gPrgrmFunctionTable[funcIndex]);
+
+        /* should halt on compiler _errors_ here */
+        if (compiler_error_count > 0)
+        {
+            printf("Too many errors. (%i)\n", compiler_error_count);
+            return;
+        }
+
+        // step two, generate intermediate code
+        ProcessCodeBlock(block, GenerateIntermediateCode, (void*)&gPrgrmFunctionTable[funcIndex]);
+
+        // ...
+
+        // iterate on all functions
+        iterator = iterator->next;
+        funcIndex++;
+    }
 }
 
 void ThirdPassStaticAnalysis()
@@ -230,8 +288,7 @@ void ReduceProgramAST(SYNTAX_TREE** astPosition)
     unsigned int reducible = 1;
     const unsigned int empty_production = 0xFF;
     unsigned int reducibleTokens[] = 
-    { 
-        //SYMBOL_BLOCK,
+    { //SYMBOL_BLOCK,
         SYMBOL_EXPR, 
         SYMBOL_CONDITION, 
         SYMBOL_LOGIC, 
@@ -271,6 +328,17 @@ void ReduceProgramAST(SYNTAX_TREE** astPosition)
                 reducible = 1;
             }
         }
+
+        // parentheses expression
+        if (node->production == PROD_FINAL)
+        {
+            SYNTAX_TREE* cur = *astPosition;
+            *astPosition = node->children[1];
+            node = *astPosition;
+            free(cur->children);
+            free(cur);
+            reducible = 1;
+        }
     }
 
     // apply for all sub-trees
@@ -281,4 +349,73 @@ void ReduceProgramAST(SYNTAX_TREE** astPosition)
         branch = *astPosition;
     }
 }
+
+
+// perform an operation on a list of fstmt's arranged in a code { block }
+void ProcessCodeBlock(SYNTAX_BLOCK* block, int (*computation)(FSTMT*, void*), void* frameData)
+{
+    Assert(block);
+
+    FSTMT_LIST* fstmtList = NULL;
+    FSTMT*        fstmt = NULL;
+
+    Assert(block->children && block->numChildren >= 0);
+
+    // derive statement block type
+    if (block->production == PROD_BLOCK_FSTMT)
+    {
+        // <block> ::= <fstmt> [PROD_BLOCK_FSTMT]
+        Assert(block->children[0]->token == SYMBOL_FSTMT);
+        fstmt = (FSTMT*)block->children[0];
+
+    } else if (block->production == PROD_BLOCK) {
+        // <block> ::= { <fstmt*> } [PROD_BLOCK]
+        Assert(block->children[1]->token == SYMBOL_FSTMT_STAR);
+        fstmtList = (FSTMT_LIST*)block->children[1];
+
+        //if (fstmtList->children[0]->token == SYMBOL_FSTMT)
+        if (fstmtList->production == PROD_FSTMT_STAR_FSTMT)
+        {
+            // <fstmt*> ::= <fstmt> <fstmt*> [PROD_FSTMT_STAR_FSTMT]
+            fstmt = (FSTMT*)fstmtList->children[0];
+        } else {
+            // <fstmt*> ::= <epsilon> [PROD_FSTMT_STAR]
+            fstmt = NULL;
+        }
+    } else {
+        // ????
+        Assert(0);
+    }
+
+    // process statements
+    if (fstmt)
+    {
+        do {
+            // iterate to next statement
+            if (fstmtList) 
+            { 
+                Assert(fstmtList->production == PROD_FSTMT_STAR_FSTMT);
+
+                fstmt = (FSTMT*)fstmtList->children[0];
+                fstmtList = fstmtList->children[1];
+                if (fstmtList->production == PROD_FSTMT_STAR)
+                    { fstmtList = NULL; }
+            }
+
+            // perform calculations
+            if (computation(fstmt, frameData) != 0)
+            {
+                // returning non-zero halts the iteration
+                break;
+            }
+
+        } while (fstmtList);
+    }
+}
+
+
+
+
+
+
 

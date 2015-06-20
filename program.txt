@@ -1,0 +1,1 @@
+main : string return "hello world";
