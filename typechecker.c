@@ -414,17 +414,6 @@ int StaticTypeChecking(FSTMT* statement, void* funcHeader)
 }
 
 
-
-int GenerateIntermediateCode(FSTMT* statement, void* funcHeader)
-{
-    Assert(statement != NULL);
-    Assert(funcHeader != NULL);
-
-    FUNC_SEGMENT* segment = (FUNC_SEGMENT*)funcHeader;
-
-    return 0;
-}
-
 int IsBinaryOperator(int productionNum)
 {
     switch (productionNum)
