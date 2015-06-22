@@ -123,7 +123,8 @@ int main(int argc, char** argv)
 {
     /* int           error; */
 
-    TestParser("program.txt");
+    TestParser("test.txt");
+    //TestParser("program.txt");
     //TestParser("static-test.txt");
     getchar();
 

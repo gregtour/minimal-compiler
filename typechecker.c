@@ -197,6 +197,14 @@ int CreateLocalVariables(FSTMT* statement, void* funcHeader)
             declaration = declaration->children[2];
         }
     }
+    else if (statement->production == PROD_FSTMT_IF)
+    {
+
+    }
+    else if (statement->production == PROD_FSTMT_WHILE)
+    {
+
+    }
 
     return 0;
 }
