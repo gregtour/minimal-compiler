@@ -1,0 +1,44 @@
+include "IO";
+
+fibonacci (i: int): int
+{
+	a, b: int;
+
+	if (i > 1) {
+		a = fibonacci(i-1);
+		b = fibonacci(i-2);
+		return a + b;
+	} else {
+		return 1;
+	}
+}
+
+fibonacci_static (i: int): int
+{
+	accum_a, accum_b : int;
+	swap : int;
+	accum_a = 0;
+	accum_b = 1;
+
+	while (i > 0)
+	{
+
+		swap = accum_b;
+		accum_b = accum_a + accum_b;
+		accum_a = swap;
+	}
+
+	return accum_b;
+}
+
+main (): int
+{
+	idx, result : int;
+
+	result = fibonacci(3) + fibonacci(4);
+
+	prints("The fifth fibonacci number is ");
+	printi(result);
+
+	return 0;
+}
