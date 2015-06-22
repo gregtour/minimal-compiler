@@ -10,9 +10,9 @@
 const char* REG_MNC[] = 
 {
     "%rax", "%rbx", "%rcx", "%rdx", 
-	"%rbp", "%rsi", "%rdi", "%rsp",
-	"%r8",  "%r9",  "%r10", "%r11", 
-	"%r12", "%r13", "%r14", "%r15", 
+    "%rbp", "%rsi", "%rdi", "%rsp",
+    "%r8",  "%r9",  "%r10", "%r11", 
+    "%r12", "%r13", "%r14", "%r15", 
 };
 
 
@@ -23,9 +23,9 @@ const char* REG_MNC[] =
 const char* REG_MNC[] = 
 {
     "rax", "rbx", "rcx", "rdx", 
-	"rbp", "rsi", "rdi", "rsp",
-	"r8",  "r9",  "r10", "r11", 
-	"r12", "r13", "r14", "r15",
+    "rbp", "rsi", "rdi", "rsp",
+    "r8",  "r9",  "r10", "r11", 
+    "r12", "r13", "r14", "r15",
 };
 
 

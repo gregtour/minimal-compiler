@@ -26,9 +26,9 @@ int GenerateIntermediateCode(FSTMT* statement, void* funcHeader)
     case PROD_FSTMT_IDENTIFIER_A:
     {
         // create assignment IR
-		// locate identifier
+        // locate identifier
 
-//		PUSH_INST(assignment, r0, r1, ... );
+//        PUSH_INST(assignment, r0, r1, ... );
         break;
     }
     // <fstmt> ::= <identifier> [ <expr> ] = <expr> ;
@@ -44,8 +44,8 @@ int GenerateIntermediateCode(FSTMT* statement, void* funcHeader)
     {
         // evaluate expression
         // no need to store result
-		EXPR* expr = (EXPR*)(statement->children[0]);
-		GenerateExprIRCode(expr, segment);
+        EXPR* expr = (EXPR*)(statement->children[0]);
+        GenerateExprIRCode(expr, segment);
         break;
     }
     // <fstmt> ::= if ( <expr> ) <block> <else>
@@ -96,90 +96,90 @@ int GenerateIntermediateCode(FSTMT* statement, void* funcHeader)
 
 int GenerateExprIRCode(EXPR* expression, FUNC_SEGMENT* segment)
 {
-	switch (expression->production)
-	{
-	case PROD_CONDITION_AND:
-	{
-		break;
-	}
-	case PROD_CONDITION_OR:
-	{
-		break;
-	}
-	case PROD_LOGIC_NOT:
-	{
-		break;
-	}
-	case PROD_COMPARISON_EQUAL_TO:
-	{
-		break;
-	}
-	case PROD_COMPARISON_UNEQUAL_TO:
-	{
-		break;
-	}
-	case PROD_COMPARISON_LESS:
-	{
-		break;
-	}
-	case PROD_COMPARISON_GREATER:
-	{
-		break;
-	}
-	case PROD_COMPARISON_L_EQUAL:
-	{
-		break;
-	}
-	case PROD_COMPARISON_G_EQUAL:
-	{
-		break;
-	}
-	case PROD_ARITHMETIC_ADD:
-	{
-		break;
-	}
-	case PROD_ARITHMETIC_SUBTRACT:
-	{
-		break;
-	}
-	case PROD_TERM_MULTIPLY:
-	{
-		break;
-	}
-	case PROD_TERM_DIVIDE:
-	{
-		break;
-	}
-	case PROD_TERM_MODULUS:
-	{
-		break;
-	}
-	case PROD_FACTOR_MINUS:
-	{
-		break;
-	}
-	case PROD_FACTOR_NOT:
-	{
-		break;
-	}
-	case PROD_FINAL_ARRAY_INDEX:
-	{
-		break;
-	}
-	case PROD_FINAL_FUNCTION_CALL:
-	{
-		break;
-	}
-	case PROD_FINAL_BOOLEAN:
-	{
-		break;
-	}
-	case PROD_FINAL_IDENTIFIER:
-	case PROD_FINAL_INTEGER:
-	case PROD_FINAL_STRING:
-	default:
-		break;
-	}
+    switch (expression->production)
+    {
+    case PROD_CONDITION_AND:
+    {
+        break;
+    }
+    case PROD_CONDITION_OR:
+    {
+        break;
+    }
+    case PROD_LOGIC_NOT:
+    {
+        break;
+    }
+    case PROD_COMPARISON_EQUAL_TO:
+    {
+        break;
+    }
+    case PROD_COMPARISON_UNEQUAL_TO:
+    {
+        break;
+    }
+    case PROD_COMPARISON_LESS:
+    {
+        break;
+    }
+    case PROD_COMPARISON_GREATER:
+    {
+        break;
+    }
+    case PROD_COMPARISON_L_EQUAL:
+    {
+        break;
+    }
+    case PROD_COMPARISON_G_EQUAL:
+    {
+        break;
+    }
+    case PROD_ARITHMETIC_ADD:
+    {
+        break;
+    }
+    case PROD_ARITHMETIC_SUBTRACT:
+    {
+        break;
+    }
+    case PROD_TERM_MULTIPLY:
+    {
+        break;
+    }
+    case PROD_TERM_DIVIDE:
+    {
+        break;
+    }
+    case PROD_TERM_MODULUS:
+    {
+        break;
+    }
+    case PROD_FACTOR_MINUS:
+    {
+        break;
+    }
+    case PROD_FACTOR_NOT:
+    {
+        break;
+    }
+    case PROD_FINAL_ARRAY_INDEX:
+    {
+        break;
+    }
+    case PROD_FINAL_FUNCTION_CALL:
+    {
+        break;
+    }
+    case PROD_FINAL_BOOLEAN:
+    {
+        break;
+    }
+    case PROD_FINAL_IDENTIFIER:
+    case PROD_FINAL_INTEGER:
+    case PROD_FINAL_STRING:
+    default:
+        break;
+    }
 
-	return 0;
+    return 0;
 }
