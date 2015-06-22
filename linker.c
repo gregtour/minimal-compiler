@@ -16,7 +16,7 @@ int IsLibraryDefinition(const char* sourceFile)
 
 void LinkLibrary(const char* sourceFile)
 {
-    if (strcmp("standard.inc", sourcefile) == 0)
+    if (strcmp("standard.inc", sourceFile) == 0)
     {
         //LinkFunctionRoot(printfDef);
 
@@ -30,4 +30,4 @@ void LinkLibrary(const char* sourceFile)
     // }
 }
 
-
+void ProcessPrintf(SYNTAX_BLOCK* block, FUNC_SEGMENT* segment) { }

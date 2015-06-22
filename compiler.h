@@ -9,6 +9,15 @@
 
 #include "lr_parser.h"
 
+/* Target Platform */
+
+#define _PLATFORM_64
+// #define _PLATFORM_32
+
+#define _LINUX
+// #define _WINDOWS
+
+
 /* Parser Sub-tree Alias Types */
 
 typedef SYNTAX_TREE        PROGRAM;
@@ -24,6 +33,7 @@ typedef SYNTAX_TREE        ARG_LIST;
 
 
 /* Defined Constants */
+
 #define TYPE_VOID               0
 #define TYPE_INTEGER            1
 #define TYPE_STRING             2
@@ -53,6 +63,15 @@ typedef struct TYPE {
   unsigned int basic;
   /*USERTYPE* user;*/
 } TYPE;
+
+/* Intermediate Representation */
+typedef struct IRCODE {
+    unsigned int operationType;
+    unsigned int arg0;
+    unsigned int arg1;
+    unsigned int arg2;
+    struct IRCODE* next;
+} IRCODE;
 
 /* Type Checking */
 
@@ -91,6 +110,9 @@ typedef struct FUNC_SEGMENT
     VARLIST* params;
     VARLIST* locals;
 
+    // IR code generation
+    IRCODE* root;
+
     // state based variables, for processing
     int isInLoop;
     unsigned int x;
@@ -128,10 +150,12 @@ void SourceReductions(SYNTAX_TREE** root);    // unused
 void StaticAnalysis(SYNTAX_TREE* root);
 
 /* Pre-pass reductions */
+
 void ReduceProgramAST(SYNTAX_TREE** program);
 void RefactorElseStatements(SYNTAX_TREE** astPosition);
 
 /* Static analysis */
+
 void FirstPassStaticAnalyzer(PROGRAM* root);
 void SecondPassStaticAnalysis(SOURCE* sources, FUNCTION* functions, VARLIST* variables);
 void ThirdPassStaticAnalysis();
@@ -149,14 +173,27 @@ int GenerateIntermediateCode(FSTMT* statement, void* funcHeader);
 /* Abstract syntax tree operations */
 
 void ProcessCodeBlock(SYNTAX_BLOCK* block, int (*computation)(FSTMT*, void*), void* frameData);
+void ProcessPrintf(SYNTAX_BLOCK* block, FUNC_SEGMENT* segment);
 
 /* Type Checking */
+
 int  CheckExpressionType(TYPE type, EXPR* expr, FUNC_SEGMENT* segment);
 // int  CheckStaticTypes(SYNTAX_BLOCK* codeblock);
 TYPE DeriveType(TYPE_DECL* sourceExpression);
 
 
+/* Platform */
+
+extern const char* REG_MNC[];
+
+/* Linker */
+
+int  IsLibraryDefinition(const char* sourceFile);
+void LinkLibrary(const char* sourceFile);
+
+
 /* Debug tools */
+
 #define CompilerError(message)      CLError(message, __FILE__, __LINE__);
 extern void CLError(const char* message, const char* source, int lineNumber);
 

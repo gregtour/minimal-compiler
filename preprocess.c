@@ -187,11 +187,24 @@ void SecondPassStaticAnalysis(SOURCE* sources, FUNCTION* functions, VARLIST* var
         gPrgrmFunctionTable[funcIndex].isInLoop = 0;
         ProcessCodeBlock(block, StaticTypeChecking, (void*)&gPrgrmFunctionTable[funcIndex]);
 
-        /* should halt on compiler _errors_ here */
+        // should halt on compiler _errors_ here
         if (compiler_error_count > 0)
         {
             printf("Too many errors. (%i)\n", compiler_error_count);
             return;
+        }
+
+        // our one built in function
+        if (strcmp("printf", iterator->identifier) == 0)
+        {
+            Assert(iterator->type.basic == TYPE_INTEGER);
+            Assert(iterator->parameters);
+            Assert(iterator->parameters->type.basic == TYPE_STRING);
+            // ...
+            ProcessPrintf(block, &gPrgrmFunctionTable[funcIndex]);
+            iterator = iterator->next;
+            funcIndex++;
+            continue;
         }
 
         // step two, generate intermediate code
@@ -349,7 +362,6 @@ void ReduceProgramAST(SYNTAX_TREE** astPosition)
         branch = *astPosition;
     }
 }
-
 
 // perform an operation on a list of fstmt's arranged in a code { block }
 void ProcessCodeBlock(SYNTAX_BLOCK* block, int (*computation)(FSTMT*, void*), void* frameData)

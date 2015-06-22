@@ -82,6 +82,12 @@ void LinkSourceRoot(const char* sourceFile, SYNTAX_TREE** insertionPoint)
 {
     printf("Linking source file %s.\n", sourceFile);
     // allow for linking multiple source files in one project
+
+    // link standard library
+    // if (IsLibraryDefinition(sourceFile))
+    // {
+    //    LinkLibrary(sourceFile);
+    // }
 }
 
 // parse source types from type expressions
@@ -418,19 +424,19 @@ int IsBinaryOperator(int productionNum)
 {
     switch (productionNum)
     {
-    case PROD_CONDITION_CONDITION_A:
-    case PROD_CONDITION_CONDITION_B:
-    case PROD_COMPARISON_COMPARISON_A:
-    case PROD_COMPARISON_COMPARISON_B:
-    case PROD_COMPARISON_COMPARISON_C:
-    case PROD_COMPARISON_COMPARISON_D:
-    case PROD_COMPARISON_COMPARISON_E:
-    case PROD_COMPARISON_COMPARISON_F:
-    case PROD_ARITHMETIC_ARITHMETIC_A:
-    case PROD_ARITHMETIC_ARITHMETIC_B:
-    case PROD_TERM_TERM_A:
-    case PROD_TERM_TERM_B:
-    case PROD_TERM_TERM_C:
+    case PROD_CONDITION_AND:
+    case PROD_CONDITION_OR:
+    case PROD_COMPARISON_EQUAL_TO:
+    case PROD_COMPARISON_UNEQUAL_TO:
+    case PROD_COMPARISON_LESS:
+    case PROD_COMPARISON_GREATER:
+    case PROD_COMPARISON_L_EQUAL:
+    case PROD_COMPARISON_G_EQUAL:
+    case PROD_ARITHMETIC_ADD:
+    case PROD_ARITHMETIC_SUBTRACT:
+    case PROD_TERM_MULTIPLY:
+    case PROD_TERM_DIVIDE:
+    case PROD_TERM_MODULUS:
         return 1;
     }
     return 0;
@@ -440,14 +446,14 @@ int IsIntegerOnlyOperator(int productionNum)
 {
     switch (productionNum)
     {
-    case PROD_COMPARISON_COMPARISON_C:
-    case PROD_COMPARISON_COMPARISON_D:
-    case PROD_COMPARISON_COMPARISON_E:
-    case PROD_COMPARISON_COMPARISON_F:
-    case PROD_ARITHMETIC_ARITHMETIC_B:
-    case PROD_TERM_TERM_A:
-    case PROD_TERM_TERM_B:
-    case PROD_TERM_TERM_C:
+    case PROD_COMPARISON_LESS:
+    case PROD_COMPARISON_GREATER:
+    case PROD_COMPARISON_L_EQUAL:
+    case PROD_COMPARISON_G_EQUAL:
+    case PROD_ARITHMETIC_SUBTRACT:
+    case PROD_TERM_MULTIPLY:
+    case PROD_TERM_DIVIDE:
+    case PROD_TERM_MODULUS:
         return 1;
     }
     return 0;
@@ -456,21 +462,21 @@ int IsIntegerOnlyOperator(int productionNum)
 int IsUnaryOperator(int productionNum)
 {
     return (productionNum == PROD_LOGIC_NOT
-        || productionNum == PROD_FACTOR_A
-        || productionNum == PROD_FACTOR_B);
+        || productionNum == PROD_FACTOR_MINUS
+        || productionNum == PROD_FACTOR_NOT);
 }
 
 int IsStringOperation(int productionNum)
 {
-    return (productionNum == PROD_ARITHMETIC_ARITHMETIC_A
-        || productionNum == PROD_FINAL_IDENTIFIER_B
-        || productionNum == PROD_FINAL_IDENTIFIER_C);
+    return (productionNum == PROD_ARITHMETIC_ADD
+        || productionNum == PROD_FINAL_ARRAY_INDEX
+        || productionNum == PROD_FINAL_FUNCTION_CALL);
 }
 
 int IsArrayOperation(int productionNum)
 {
-    return (productionNum == PROD_FINAL_IDENTIFIER_B
-        || productionNum == PROD_FINAL_IDENTIFIER_C);
+    return (productionNum == PROD_FINAL_ARRAY_INDEX
+        || productionNum == PROD_FINAL_FUNCTION_CALL);
 }
 
 
@@ -625,7 +631,7 @@ int CheckExpressionType(TYPE type, EXPR* expr, FUNC_SEGMENT* segment)
         integer.size = 4;
 
         if (expr->production == PROD_LOGIC_NOT
-            || expr->production == PROD_FACTOR_B)
+            || expr->production == PROD_FACTOR_NOT)
         {
             return CheckExpressionType(nonvoid, subExpr, segment);
         }
@@ -634,7 +640,7 @@ int CheckExpressionType(TYPE type, EXPR* expr, FUNC_SEGMENT* segment)
     }
 
     // check array addressing //
-    if (expr->production == PROD_FINAL_IDENTIFIER_B)
+    if (expr->production == PROD_FINAL_ARRAY_INDEX)
     {
         // <final> ::= <identifier> [ <expr> ]
         VARLIST* variable;
@@ -677,7 +683,7 @@ int CheckExpressionType(TYPE type, EXPR* expr, FUNC_SEGMENT* segment)
     }
 
     // check function invocation //
-    if (expr->production == PROD_FINAL_IDENTIFIER_C)
+    if (expr->production == PROD_FINAL_FUNCTION_CALL)
     {
         // <final> ::= <identifier> ( <arg*> )
         ARG_LIST* arguments;
