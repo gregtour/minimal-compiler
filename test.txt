@@ -26,6 +26,8 @@ fibonacci_static (i: int): int
 		swap = accum_b;
 		accum_b = accum_a + accum_b;
 		accum_a = swap;
+		
+		i = i - 1;
 	}
 
 	return accum_b;
