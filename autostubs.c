@@ -9,8 +9,8 @@
 /* 1. <program> -> <gstmt*> */
 int ReduceProgram(SYNTAX_TREE* node)
 {
-    Assert(node->numChildren == 1);
     SYNTAX_TREE* gstmt_1 = node->children[0];
+    Assert(node->numChildren == 1);
 
     int error = 0;
     error = (error ? error : ProcessNode(gstmt_1));
@@ -21,9 +21,9 @@ int ReduceProgram(SYNTAX_TREE* node)
 /* 2. <gstmt*> -> <gstmt> <gstmt*> */
 int ReduceGstmtStarA(SYNTAX_TREE* node)
 {
-    Assert(node->numChildren == 2);
     SYNTAX_TREE* gstmt1 = node->children[0];
     SYNTAX_TREE* gstmt_1 = node->children[1];
+    Assert(node->numChildren == 2);
 
     int error = 0;
     error = (error ? error : ProcessNode(gstmt1));
@@ -35,9 +35,8 @@ int ReduceGstmtStarA(SYNTAX_TREE* node)
 /* 3. <gstmt*> -> */
 int ReduceGstmtStarB(SYNTAX_TREE* node)
 {
-    Assert(node->numChildren == 0);
-
     int error = 0;
+    Assert(node->numChildren == 0);
 
     return error;
 }

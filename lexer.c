@@ -1,5 +1,7 @@
 /* lexer.c */
+
 #include "lr_parser.h"
+
 
 // lexer list functions
 void LexAddBlock(L_TOKEN** start,
@@ -217,7 +219,9 @@ L_TOKEN* LexSource(const char*    file,
     int   read;
     int   i, j;
     int   a, b;
-    int   token;
+
+    L_TOKEN* start = NULL;
+    L_TOKEN* end = NULL;
 
     // read source file
     // printf("Loading source file from %s...\n", file);
@@ -333,8 +337,6 @@ L_TOKEN* LexSource(const char*    file,
 
     // lex
     // printf("Lexing...\n\n");
-    L_TOKEN* start = NULL;
-    L_TOKEN* end = NULL;
 
     for (i = 0; i < size; i++)
     {
@@ -485,10 +487,10 @@ void FreeLexing(L_TOKEN* lexing,
 // testing
 void PrintLexing(L_TOKEN* lexing)
 {
+    int i;
     printf("NUMBER  STRING\n");
     printf("--------------\n");
     
-    int i;
     while (lexing)
     {
         printf("0x%.4X  ", lexing->token);

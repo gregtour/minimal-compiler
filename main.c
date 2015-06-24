@@ -33,7 +33,6 @@ int TestParser(const char* program)
     L_TOKEN*      lexing;
     SYNTAX_TREE*  syntax;
     char*         buffer;
-    int           error;
 
     printf("\n");
     PrintGrammar(CONTEXT_FREE_GRAMMAR);

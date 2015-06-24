@@ -28,21 +28,24 @@ void StaticAnalysis(SYNTAX_TREE* root)
 // Builds tables of functions and global variables
 void FirstPassStaticAnalyzer(PROGRAM* root)
 {
+    GSTMT_LIST* iterator;
+
     Assert(root != NULL);
     Assert(root->token == SYMBOL_PROGRAM);
     Assert(root->production == PROD_PROGRAM_GSTMT_STAR);
     Assert(root->numChildren == 1);
 
     // Analyze all top-level declarations of functions and variables
-    GSTMT_LIST* iterator = root->children[0];
+    iterator = root->children[0];
 
     // Iterate through the list of <gstmt>'s.
     while (iterator && iterator->production == PROD_GSTMT_STAR_GSTMT)
     {
+        GSTMT* statement;
+
         Assert(iterator->token == SYMBOL_GSTMT_STAR);
         Assert(iterator->numChildren == 2);
 
-        GSTMT* statement;
         statement = (GSTMT*)iterator->children[0];
 
         Assert(statement != NULL);
@@ -57,12 +60,12 @@ void FirstPassStaticAnalyzer(PROGRAM* root)
             // <gstmt> ::= include <string-list> ;
             while (list)
             {
-                Assert(list->token == SYMBOL_STRING_LIST);
-
                 SYNTAX_TREE* string = list->children[0];
+                const char* sourcefile = string->string;
+
+                Assert(list->token == SYMBOL_STRING_LIST);
                 Assert(string && string->token == gSymbolString);
 
-                const char* sourcefile = string->string;
                 LinkSourceRoot(sourcefile, &statement);
 
                 if (list->numChildren > 1) 
@@ -84,11 +87,13 @@ void FirstPassStaticAnalyzer(PROGRAM* root)
             {
             // <gstmt> ::= <type-declaration> ;
             SYNTAX_TREE* declaration = statement->children[0];
+            TYPE_DECL* typeTag;
+            TYPE type;
             Assert(declaration->token == SYMBOL_TYPE_DECLARATION);
 
             // (A) <type-declaration> ::= <identifier> : <type>
             // (B) <type-declaration> ::= <identifier> , <type-declaration>
-            TYPE_DECL* typeTag = (TYPE_DECL*)declaration->children[2];
+            typeTag = (TYPE_DECL*)declaration->children[2];
 
             while (typeTag->token != SYMBOL_TYPE) 
             {
@@ -97,7 +102,7 @@ void FirstPassStaticAnalyzer(PROGRAM* root)
                 typeTag = typeTag->children[2];
             }
 
-            TYPE type = DeriveType(typeTag);
+            type = DeriveType(typeTag);
             // LinkVariable(<type>, <identifier>)
             while (declaration->token == SYMBOL_TYPE_DECLARATION)
             {
@@ -111,12 +116,15 @@ void FirstPassStaticAnalyzer(PROGRAM* root)
             }
         case PROD_GSTMT_IDENTIFIER_A:
             {
+            const char* funcName;
+            TYPE returnType;
+            SYNTAX_TREE* code;
             Assert(statement->numChildren == 4);
 
             // <gstmt> ::= <identifier> : <type> <block>
-            const char* funcName = statement->children[0]->string;
-            TYPE returnType = DeriveType(statement->children[2]);
-            SYNTAX_TREE* code = statement->children[3];
+            funcName = statement->children[0]->string;
+            returnType = DeriveType(statement->children[2]);
+            code = statement->children[3];
 
             // parameterless function method
             LinkFunctionRoot(returnType, funcName, NULL, code);
@@ -124,13 +132,18 @@ void FirstPassStaticAnalyzer(PROGRAM* root)
             }
         case PROD_GSTMT_IDENTIFIER_B:
             {
+            const char* funcName; 
+            SYNTAX_TREE* params;
+            TYPE returnType;
+            SYNTAX_TREE* code;
+
             Assert(statement->numChildren == 7);
 
             // <gstmt> ::= <identifier> ( <param*> ) : <type> <block>
-            const char* funcName = statement->children[0]->string;
-            SYNTAX_TREE* params = statement->children[2];
-            TYPE returnType = DeriveType(statement->children[5]);
-            SYNTAX_TREE* code = statement->children[6];
+            funcName = statement->children[0]->string;
+            params = statement->children[2];
+            returnType = DeriveType(statement->children[5]);
+            code = statement->children[6];
 
             // function method
             LinkFunctionRoot(returnType, funcName, params, code);
@@ -171,9 +184,9 @@ void SecondPassStaticAnalysis(SOURCE* sources, FUNCTION* functions, VARLIST* var
     funcIndex = 0;
     while (iterator)
     {
-        Assert(funcIndex == iterator->index);
-
         SYNTAX_BLOCK* block = iterator->block;
+
+        Assert(funcIndex == iterator->index);
 
         // set function header properly
         gPrgrmFunctionTable[funcIndex].locals = NULL;
@@ -226,12 +239,15 @@ void ThirdPassStaticAnalysis()
 // Allow for outermost else-clauses on if statements
 void RefactorElseStatements(SYNTAX_TREE** astPosition)
 {
+    SYNTAX_TREE* branch;
+    SYNTAX_TREE* sourceSyntax;
     int i;
-    SYNTAX_TREE* sourceSyntax = *astPosition;
 
     const int BLOCK_FSTMT_CHILD = 0;
     const int IF_PROD_CODE_CHILD = 4;
     const int IF_PROD_ELSE_CHILD = 5;
+
+    sourceSyntax = *astPosition;
 
     // <fstmt> ::= if ( <expr> ) <block> <else> 
     for (; sourceSyntax->production == PROD_FSTMT_IF;)
@@ -286,7 +302,7 @@ void RefactorElseStatements(SYNTAX_TREE** astPosition)
     }
 
     // apply for all sub-trees
-    SYNTAX_TREE* branch = *astPosition;
+    branch = *astPosition;
     for (i = 0; i < branch->numChildren; i++)
     {
         RefactorElseStatements(&branch->children[i]);
@@ -297,9 +313,12 @@ void RefactorElseStatements(SYNTAX_TREE** astPosition)
 // Remove excessive non-terminals from the syntax tree
 void ReduceProgramAST(SYNTAX_TREE** astPosition)
 {
-    unsigned int i; 
+    SYNTAX_TREE* node;
+    SYNTAX_TREE* branch;
     unsigned int reducible = 1;
-    const unsigned int empty_production = 0xFF;
+    const unsigned int empty_production = 0;
+    int i;
+
     unsigned int reducibleTokens[] = 
     { //SYMBOL_BLOCK,
         SYMBOL_EXPR, 
@@ -313,7 +332,7 @@ void ReduceProgramAST(SYNTAX_TREE** astPosition)
     };
 
     if (astPosition == NULL) return;
-    SYNTAX_TREE* node = *astPosition;
+    node = *astPosition;
 
     // continue while reducible
     while (reducible)
@@ -327,7 +346,7 @@ void ReduceProgramAST(SYNTAX_TREE** astPosition)
                 node->numChildren == 1)
             {
                 SYNTAX_TREE* cur = *astPosition;
-                unsigned int child;
+                int child;
 
                 for (child = 1; child < cur->numChildren; child++)
                 {
@@ -355,7 +374,7 @@ void ReduceProgramAST(SYNTAX_TREE** astPosition)
     }
 
     // apply for all sub-trees
-    SYNTAX_TREE* branch = *astPosition;
+    branch = *astPosition;
     for (i = 0; i < branch->numChildren; i++)
     {
         ReduceProgramAST(&branch->children[i]);
@@ -366,11 +385,10 @@ void ReduceProgramAST(SYNTAX_TREE** astPosition)
 // perform an operation on a list of fstmt's arranged in a code { block }
 void ProcessCodeBlock(SYNTAX_BLOCK* block, int (*computation)(FSTMT*, void*), void* frameData)
 {
-    Assert(block);
-
     FSTMT_LIST* fstmtList = NULL;
-    FSTMT*        fstmt = NULL;
+    FSTMT*          fstmt = NULL;
 
+    Assert(block);
     Assert(block->children && block->numChildren >= 0);
 
     // derive statement block type
@@ -424,10 +442,4 @@ void ProcessCodeBlock(SYNTAX_BLOCK* block, int (*computation)(FSTMT*, void*), vo
         } while (fstmtList);
     }
 }
-
-
-
-
-
-
 

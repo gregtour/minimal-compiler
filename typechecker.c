@@ -27,14 +27,18 @@ void LinkFunctionRoot(TYPE type, const char* identifier, SYNTAX_TREE* parameters
     {
         while (parameters)
         {
+            const char* identifier;
+            TYPE type;
+            int result;
+
             Assert(parameters->children && parameters->numChildren >= 3);
             Assert(parameters->children[0] && parameters->children[0]->string);
             Assert(parameters->children[2]->token == SYMBOL_TYPE);
 
-            const char* identifier = parameters->children[0]->string;
-            TYPE type = DeriveType(parameters->children[2]);
+            identifier = parameters->children[0]->string;
+            type = DeriveType(parameters->children[2]);
 
-            int result = AddVariableToList(&paramList, type, identifier);
+            result = AddVariableToList(&paramList, type, identifier);
             if (result == 0)
             {
                 CompilerError("Parameter variable redefined.");
@@ -128,21 +132,24 @@ TYPE DeriveType(TYPE_DECL* sourceExpression)
 // build the indexed list of local variables (scopeless)
 int CreateLocalVariables(FSTMT* statement, void* funcHeader)
 {
+    FUNC_SEGMENT* segment = (FUNC_SEGMENT*)funcHeader;
+
     Assert(statement != NULL);
     Assert(funcHeader != NULL);
-
-    FUNC_SEGMENT* segment = (FUNC_SEGMENT*)funcHeader;
 
     // look only at type declarations
     if (statement->production == PROD_FSTMT_TYPE_DECLARATION)
     {
         // <fstmt> ::= <type-declaration> ;
+        TYPE type;
+        TYPE_DECL* typeTag;
         SYNTAX_TREE* declaration = statement->children[0];
+
         Assert(declaration->token == SYMBOL_TYPE_DECLARATION);
 
         // (A) <type-declaration> ::= <identifier> : <type>
         // (B) <type-declaration> ::= <identifier> , <type-declaration>
-        TYPE_DECL* typeTag = (TYPE_DECL*)declaration->children[2];
+        typeTag = (TYPE_DECL*)declaration->children[2];
 
         while (typeTag->token != SYMBOL_TYPE) 
         {
@@ -151,7 +158,7 @@ int CreateLocalVariables(FSTMT* statement, void* funcHeader)
             typeTag = typeTag->children[2];
         }
 
-        TYPE type = DeriveType(typeTag);
+        type = DeriveType(typeTag);
         if (type.basic == TYPE_VOID)
         {
             CompilerError("Attempting to define variable(s) as void.");
@@ -161,13 +168,16 @@ int CreateLocalVariables(FSTMT* statement, void* funcHeader)
         // LinkVariable(<type>, <identifier>)
         while (declaration->token == SYMBOL_TYPE_DECLARATION)
         {
+            VARLIST* existing;
+            const char* identifier;
+
             Assert(declaration->children);
             Assert(declaration->children[0]);
 
-            const char* identifier = declaration->children[0]->string;
+            identifier = declaration->children[0]->string;
 
             // check for duplicate list with global vars
-            VARLIST* existing = GetVariableFromList(gPrgrmVariables, identifier);
+            existing = GetVariableFromList(gPrgrmVariables, identifier);
             if (existing != NULL)
             {
                 CompilerError("Global variable redefined in local function.");
@@ -212,10 +222,10 @@ int CreateLocalVariables(FSTMT* statement, void* funcHeader)
 // check the use of types in all statements and expressions, and check for invalid break / continue statements
 int StaticTypeChecking(FSTMT* statement, void* funcHeader)
 {
+    FUNC_SEGMENT* segment = (FUNC_SEGMENT*)funcHeader;
+
     Assert(statement != NULL);
     Assert(funcHeader != NULL);
-
-    FUNC_SEGMENT* segment = (FUNC_SEGMENT*)funcHeader;
 
     switch (statement->production)
     {
@@ -228,13 +238,13 @@ int StaticTypeChecking(FSTMT* statement, void* funcHeader)
     // <fstmt> ::= <identifier> = <expr> ;
     case PROD_FSTMT_IDENTIFIER_A:
     {
-        Assert(statement->numChildren == 4);
-        Assert(statement->children);
-        Assert(statement->children[0] && statement->children[0]->string);
-
         const char* identifier;
         VARLIST* assignee;
         EXPR* expr;
+
+        Assert(statement->numChildren == 4);
+        Assert(statement->children);
+        Assert(statement->children[0] && statement->children[0]->string);
 
         expr = (EXPR*)(statement->children[2]);
         identifier = statement->children[0]->string;
@@ -258,14 +268,15 @@ int StaticTypeChecking(FSTMT* statement, void* funcHeader)
     // <fstmt> ::= <identifier> [ <expr> ] = <expr> ;
     case PROD_FSTMT_IDENTIFIER_B:
     {
-        Assert(statement->numChildren == 6);
-        Assert(statement->children);
-        Assert(statement->children[0] && statement->children[0]->string);
-
         const char* identifier;
         VARLIST* assignee;
         EXPR* expr;
         EXPR* index;
+        TYPE integer;
+
+        Assert(statement->numChildren == 6);
+        Assert(statement->children);
+        Assert(statement->children[0] && statement->children[0]->string);
 
         expr = (EXPR*)(statement->children[5]);
         index = (EXPR*)(statement->children[2]);
@@ -287,7 +298,6 @@ int StaticTypeChecking(FSTMT* statement, void* funcHeader)
             return 1;
         }
 
-        TYPE integer;
         integer.basic = TYPE_INTEGER;
         integer.size = 4;
 
@@ -345,9 +355,10 @@ int StaticTypeChecking(FSTMT* statement, void* funcHeader)
 
         if (elseBranch->production == PROD_ELSE_ELSE)
         {
+            SYNTAX_BLOCK* elseBlock;
             Assert(elseBranch->children[1]->token == SYMBOL_BLOCK);
             // <else> ::= else <block>
-            SYNTAX_BLOCK* elseBlock = (SYNTAX_BLOCK*)(elseBranch->children[1]);
+            elseBlock = (SYNTAX_BLOCK*)(elseBranch->children[1]);
             ProcessCodeBlock(elseBlock, StaticTypeChecking, funcHeader);
         }
 
@@ -412,8 +423,8 @@ int StaticTypeChecking(FSTMT* statement, void* funcHeader)
     // <fstmt> ::= return <expr> ;
     case PROD_FSTMT_RETURN_B:
     {
-        Assert(statement->children && statement->children[1]);
         EXPR* expr;
+        Assert(statement->children && statement->children[1]);
         expr = (EXPR*)(statement->children[1]);
         CheckExpressionType(segment->returnType, expr, segment);
         break;
@@ -495,7 +506,6 @@ int CanCoerceToType(TYPE dest, TYPE source)
     {
     case TYPE_INTEGER:
         if (source.basic == TYPE_INTEGER)
-        //if (source.basic != TYPE_VOID)
             return 0;
         else
             return 1;
@@ -584,6 +594,7 @@ int CheckExpressionType(TYPE type, EXPR* expr, FUNC_SEGMENT* segment)
     {
         EXPR* subExprA;
         EXPR* subExprB;
+        TYPE nonvoid;
 
         subExprA = (EXPR*)(expr->children[0]);
         subExprB = (EXPR*)(expr->children[2]);
@@ -607,7 +618,6 @@ int CheckExpressionType(TYPE type, EXPR* expr, FUNC_SEGMENT* segment)
             return 0;
         }
 
-        TYPE nonvoid;
         nonvoid.basic = TYPE_NON_VOID;
         nonvoid.size = 4;
 
@@ -681,6 +691,7 @@ int CheckExpressionType(TYPE type, EXPR* expr, FUNC_SEGMENT* segment)
 
         intType.basic = TYPE_INTEGER;
         intType.size = 4;
+
         if (CheckExpressionType(intType, arrayIndex, segment) != 0)
         {
             CompilerError("Using non-integer type as array index.");

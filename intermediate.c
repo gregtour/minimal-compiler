@@ -9,10 +9,10 @@ int GenerateExprIRCode(FSTMT* statement, FUNC_SEGMENT* segment);
 // create expression level intermediate code for function statements
 int GenerateIntermediateCode(FSTMT* statement, void* funcHeader)
 {
+    FUNC_SEGMENT* segment = (FUNC_SEGMENT*)funcHeader;
+
     Assert(statement != NULL);
     Assert(funcHeader != NULL);
-
-    FUNC_SEGMENT* segment = (FUNC_SEGMENT*)funcHeader;
 
     switch (statement->production)
     {
