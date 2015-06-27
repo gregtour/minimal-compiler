@@ -19,7 +19,7 @@ Functions are defined as they are declared. Multiple source files can be include
 ####Example:
 
 ```
-include "source2.code"
+include "source2.code";
 ```
 
 Functions are composed of either a single statement or a block of statements. Each statement is made up of individual expressions, assignments, conditionals, or loops. If/else statements are supported. In the case of ambiguous else branches in the case of several in-line if statements, each else statement is paired with the outermost if or conditional possible. This is the opposite behavior of most other programming languages. While-loops are currently the only loop supported, out of simplicity.
