@@ -33,6 +33,7 @@ int TestParser(const char* program)
     L_TOKEN*      lexing;
     SYNTAX_TREE*  syntax;
     char*         buffer;
+    SOURCE*       sourceIndex;
 
     printf("\n");
     PrintGrammar(CONTEXT_FREE_GRAMMAR);
@@ -62,10 +63,21 @@ int TestParser(const char* program)
         FreeLexing(lexing, buffer);
         return 4;
     }
+
+    // linker
+    LinkPrintf();
     
     // preprocessor
     PrePassReductions(&syntax);
     PrintParseTree(syntax, CONTEXT_FREE_GRAMMAR);
+
+    // index source in source list
+    AddSourceToList(&gPrgrmSources, program, lexing, syntax);
+    sourceIndex = GetSourceFromList(gPrgrmSources, program);
+
+    Assert(sourceIndex);
+
+    sourceIndex->buffer = buffer;
 
     // compilation stage 1
     SourceReductions(&syntax);
@@ -73,8 +85,8 @@ int TestParser(const char* program)
 
     // done for now
     printf("Success.\n");
-    FreeLexing(lexing, buffer);
-    FreeParseTree(syntax);
+    //FreeLexing(lexing, buffer);
+    //FreeParseTree(syntax);
 
     // free compiler data structures
     FreeCompiler();
@@ -92,9 +104,24 @@ int TestParser(const char* program)
 // memory management
 void FreeCompiler()
 {
+    SOURCE* srcItr;
+
     // free compiler data structures
     FreeVariableList(&gPrgrmVariables);
     FreeFunctionList(&gPrgrmFunctions);
+
+    for (srcItr = gPrgrmSources; srcItr; srcItr = srcItr->next)
+    {
+        if (srcItr->lexing != NULL)
+        {
+            FreeLexing(srcItr->lexing, srcItr->buffer);
+        }
+        if (srcItr->syntax != NULL)
+        {
+            FreeParseTree(srcItr->syntax);
+        }
+    }
+
     FreeSourceList(&gPrgrmSources);
 
     // zero the pointer handles

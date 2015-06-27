@@ -155,7 +155,11 @@ int FreeFunctionList(FUNCTION** list)
     while (itr)
     {
         *list = itr->next;
-        FreeVariableList(&itr->parameters);
+        if (itr->parameters != &lStringParam &&
+            itr->parameters != &lIntegerParam)
+        {
+            FreeVariableList(&itr->parameters);
+        }
         free(itr);
         itr = *list;
     }
@@ -221,6 +225,17 @@ FUNCTION* GetFunctionFromList(FUNCTION* functionList, const char* identifier)
     return NULL;
 }
 
+SOURCE* GetSourceFromList(SOURCE* sourceList, const char* identifier)
+{
+    while (sourceList)
+    {
+        if (strcmp(sourceList->filename, identifier) == 0)
+            return sourceList;
+        sourceList = sourceList->next;
+    }
+
+    return NULL;
+}
 
 
 #ifdef USE_COMPRESSED_TABLES

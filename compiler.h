@@ -81,6 +81,7 @@ typedef struct SOURCE
     L_TOKEN*        lexing;
     SYNTAX_TREE*    syntax;
     unsigned int    index;
+    char*           buffer;
     struct SOURCE*  next;
 } SOURCE;
 
@@ -142,6 +143,7 @@ unsigned int FunctionCount(FUNCTION* list);
 
 VARLIST*  GetVariableFromList(VARLIST* list, const char* identifier);
 FUNCTION* GetFunctionFromList(FUNCTION* list, const char* identifier);
+SOURCE*   GetSourceFromList(SOURCE* list, const char* identifier);
 
 /* Code Analysis */
 
@@ -188,8 +190,13 @@ extern const char* REG_MNC[];
 
 /* Linker */
 
+extern VARLIST  lStringParam;
+extern VARLIST  lIntegerParam;
+
 int  IsLibraryDefinition(const char* sourceFile);
 void LinkLibrary(const char* sourceFile);
+
+void LinkPrintf();
 
 
 /* Debug tools */

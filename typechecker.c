@@ -47,9 +47,9 @@ void LinkFunctionRoot(TYPE type, const char* identifier, SYNTAX_TREE* parameters
             // (a) <param*> ::= <identifier> : <type>
             // (b) <param*> ::= <identifier> : <type> , <param*>
             if (parameters->production == PROD_PARAM_STAR_IDENTIFIER_B)
-                parameters = parameters->children[4];
+            {   parameters = parameters->children[4]; }
             else 
-                parameters = NULL;
+            {   parameters = NULL; }
         }
     }
 
@@ -82,11 +82,40 @@ void LinkVariableRoot(TYPE type, const char* identifier)
     }
 }
 
-void LinkSourceRoot(const char* sourceFile, SYNTAX_TREE** insertionPoint)
+void LinkSourceRoot(const char* sourceFile, SYNTAX_TREE** tree)
 {
     printf("Linking source file %s.\n", sourceFile);
+    
     // allow for linking multiple source files in one project
+    if (AddSourceToList(&gPrgrmSources, sourceFile, NULL, NULL) != 0)
+    {
+        SOURCE* source = GetSourceFromList(gPrgrmSources, sourceFile);
 
+        source->lexing = LexSource(sourceFile, 
+                                   &source->buffer, 
+                                   CONTEXT_FREE_GRAMMAR);
+        if (source->lexing == NULL) {
+            printf("Error lexing source '%s'.\n", sourceFile);
+            FreeLexing(source->lexing, source->buffer);
+            return;
+        }
+
+        source->syntax = ParseSource(source->lexing,
+                                     PARSE_TABLE,
+                                     CONTEXT_FREE_GRAMMAR);
+        if (source->syntax == NULL) {
+            printf("Error parsing source '%s'.\n", sourceFile);
+            FreeLexing(source->lexing, source->buffer);
+            source->lexing = NULL;
+            return;
+        }
+
+        PrePassReductions(&source->syntax);
+        SourceReductions(&source->syntax);
+        // add to intermediate framework
+        FirstPassStaticAnalyzer(source->syntax);
+    }
+    
     // link standard library
     // if (IsLibraryDefinition(sourceFile))
     // {

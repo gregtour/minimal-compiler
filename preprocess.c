@@ -208,7 +208,7 @@ void SecondPassStaticAnalysis(SOURCE* sources, FUNCTION* functions, VARLIST* var
         }
 
         // our one built in function
-        if (strcmp("printf", iterator->identifier) == 0)
+        /*if (strcmp("printf", iterator->identifier) == 0)
         {
             Assert(iterator->type.basic == TYPE_INTEGER);
             Assert(iterator->parameters);
@@ -218,7 +218,7 @@ void SecondPassStaticAnalysis(SOURCE* sources, FUNCTION* functions, VARLIST* var
             iterator = iterator->next;
             funcIndex++;
             continue;
-        }
+        }*/
 
         // step two, generate intermediate code
         ProcessCodeBlock(block, GenerateIntermediateCode, (void*)&gPrgrmFunctionTable[funcIndex]);
@@ -387,6 +387,8 @@ void ProcessCodeBlock(SYNTAX_BLOCK* block, int (*computation)(FSTMT*, void*), vo
 {
     FSTMT_LIST* fstmtList = NULL;
     FSTMT*          fstmt = NULL;
+
+    if (block == NULL) { return; }
 
     Assert(block);
     Assert(block->children && block->numChildren >= 0);

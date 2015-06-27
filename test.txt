@@ -1,4 +1,4 @@
-include "IO";
+include "empty";
 
 fibonacci (i: int): int
 {
@@ -22,7 +22,6 @@ fibonacci_static (i: int): int
 
 	while (i > 0)
 	{
-
 		swap = accum_b;
 		accum_b = accum_a + accum_b;
 		accum_a = swap;
