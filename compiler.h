@@ -162,7 +162,7 @@ void FirstPassStaticAnalyzer(PROGRAM* root);
 void SecondPassStaticAnalysis(SOURCE* sources, FUNCTION* functions, VARLIST* variables);
 void ThirdPassStaticAnalysis();
 
-/* Intermediate Code */
+/* Types and Static Tables */
 
 void LinkFunctionRoot(TYPE type, const char* identifier, SYNTAX_TREE* parameters, SYNTAX_TREE* source);
 void LinkVariableRoot(TYPE type, const char* identifier);
@@ -183,6 +183,30 @@ int  CheckExpressionType(TYPE type, EXPR* expr, FUNC_SEGMENT* segment);
 // int  CheckStaticTypes(SYNTAX_BLOCK* codeblock);
 TYPE DeriveType(TYPE_DECL* sourceExpression);
 
+/* Intermediate Representation */
+/* Intermediate Code */
+/*
+enum {
+    VOID,
+    PUSH,
+    POP,
+    ADD,
+    SUBTRACT,
+    DIVIDE,
+    
+} COMMAND;
+*/
+
+/* the intermediate representation has it's own stack based computer */
+typedef enum {
+    NOP,                PUSH_VALUE,             PUSH_VARIABLE,      POP_VARIABLE,
+    POP,                CALL_FUNCTION,          NOT,                MINUS,
+    AND,                OR,                     ADD,                SUB,
+    MULT,               DIV,                    CMP_EQUAL,          CMP_UNEQUAL,
+    CMP_LESS,           CMP_GREATER,            CMP_LESS_EQUAL,     CMP_GREATER_EQUAL,
+    LABEL,              JUMP,                   JZ,                 LOAD,
+    STORE,              HOLD,                   RETURN_TOP
+} IR_OPCODES;
 
 /* Platform */
 
