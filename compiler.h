@@ -107,7 +107,7 @@ typedef struct FUNCTION
 struct IR_INST;
 typedef struct FUNC_SEGMENT
 {
-	const char* methodName;
+    const char* methodName;
     TYPE returnType;
     VARLIST* params;
     VARLIST* locals;

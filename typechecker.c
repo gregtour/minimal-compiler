@@ -238,11 +238,22 @@ int CreateLocalVariables(FSTMT* statement, void* funcHeader)
     }
     else if (statement->production == PROD_FSTMT_IF)
     {
-
+        // <fstmt> ::= if ( <expr> ) <block> <else>
+        ProcessCodeBlock(statement->children[4], CreateLocalVariables, funcHeader);
+        if (statement->children[5]->production = PROD_ELSE_ELSE)
+        {
+            // <else> ::= else <block>
+            SYNTAX_TREE* elseBranch;
+            SYNTAX_BLOCK* elseBlock;
+            elseBranch = statement->children[5];
+            elseBlock = (SYNTAX_BLOCK*)(elseBranch->children[1]);
+            ProcessCodeBlock(elseBlock, CreateLocalVariables, funcHeader);
+        }
     }
     else if (statement->production == PROD_FSTMT_WHILE)
     {
-
+        // <fstmt> ::= while ( <expr> ) <block>
+        ProcessCodeBlock(statement->children[4], CreateLocalVariables, funcHeader);
     }
 
     return 0;
