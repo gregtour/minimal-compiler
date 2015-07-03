@@ -107,6 +107,7 @@ typedef struct FUNCTION
 struct IR_INST;
 typedef struct FUNC_SEGMENT
 {
+	const char* methodName;
     TYPE returnType;
     VARLIST* params;
     VARLIST* locals;
@@ -205,7 +206,7 @@ typedef enum {
     AND,                OR,                 ADD,                SUB,
     MULT,               DIV,                CMP_EQUAL,          CMP_UNEQUAL,
     CMP_LESS,           CMP_GREATER,        CMP_LESS_EQUAL,     CMP_GREATER_EQUAL,
-    LABEL,              JUMP,               JZ,                 LOAD,
+    LABEL,              JUMP,               JUMPZ,              LOAD,
     STORE,              HOLD,               RETURN
 } OPCODE;
 
@@ -216,7 +217,7 @@ typedef enum {
     SCOPE_LOCAL
 } SCOPE;
 
-typedef struct IR_INST;
+typedef struct IR_INST
 {
     OPCODE       instr;
     int          immediate;
@@ -237,6 +238,12 @@ extern void PushInstL(OPCODE inst, const char* label);
 /* Platform */
 
 extern const char* REG_MNC[];
+typedef enum 
+{
+    RAX, RBX, RCX, RDX, 
+    RBP, RSI, RDI, RSP,
+} REG;
+
 
 /* Linker */
 
