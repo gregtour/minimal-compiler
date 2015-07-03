@@ -104,7 +104,7 @@ typedef struct FUNCTION
 } FUNCTION;
 
 /* Code Generation */
-
+struct IR_INST;
 typedef struct FUNC_SEGMENT
 {
     TYPE returnType;
@@ -118,6 +118,7 @@ typedef struct FUNC_SEGMENT
     int isInLoop;
     unsigned int x;
     // bool isTailRecursive
+    struct IR_INST* stream;
 } FUNC_SEGMENT;
 
 extern unsigned int  gPrgrmFunctionCount;
@@ -199,14 +200,39 @@ enum {
 
 /* the intermediate representation has it's own stack based computer */
 typedef enum {
-    NOP,                PUSH_VALUE,             PUSH_VARIABLE,      POP_VARIABLE,
-    POP,                CALL_FUNCTION,          NOT,                MINUS,
-    AND,                OR,                     ADD,                SUB,
-    MULT,               DIV,                    CMP_EQUAL,          CMP_UNEQUAL,
-    CMP_LESS,           CMP_GREATER,            CMP_LESS_EQUAL,     CMP_GREATER_EQUAL,
-    LABEL,              JUMP,                   JZ,                 LOAD,
-    STORE,              HOLD,                   RETURN_TOP
-} IR_OPCODES;
+    NOP = 0,            PUSH_VALUE,         PUSH_VARIABLE,      POP_VARIABLE,
+    POP,                CALL_FUNCTION,      NOT,                MINUS,
+    AND,                OR,                 ADD,                SUB,
+    MULT,               DIV,                CMP_EQUAL,          CMP_UNEQUAL,
+    CMP_LESS,           CMP_GREATER,        CMP_LESS_EQUAL,     CMP_GREATER_EQUAL,
+    LABEL,              JUMP,               JZ,                 LOAD,
+    STORE,              HOLD,               RETURN
+} OPCODE;
+
+typedef enum {
+    NONE = 0,
+    SCOPE_GLOBAL,
+    SCOPE_PARAMETER,
+    SCOPE_LOCAL
+} SCOPE;
+
+typedef struct IR_INST;
+{
+    OPCODE       instr;
+    int          immediate;
+    SCOPE        reference_level;
+    unsigned int relative_address;
+    const char*  label;
+    /* linked-list of IR op-codes */
+    struct IR_INST* next;
+} IR_INST;
+
+extern void SetCommandStream(IR_INST** stream);
+extern int  QueueIntermediateInstr(IR_INST** stream, OPCODE inst, int immediate, SCOPE refLevel, unsigned int relAddr, const char* label);
+extern void PushInst(OPCODE inst);
+extern void PushInstI(OPCODE inst, int immediate);
+extern void PushInstR(OPCODE inst, SCOPE refLevel, unsigned int relAddr);
+extern void PushInstL(OPCODE inst, const char* label);
 
 /* Platform */
 
