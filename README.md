@@ -1,10 +1,13 @@
 ## Minimal Compiler
 
-The minimal compiler project is an attempt to make one of the simplest, minimalistic languages that compiles to x86-64 assembly and machine code. Currently, the syntax is inspired by C-code with a little bit of influence from the Duck programing language. It is also modeled after Go and Objective-C to some extent. 
+The minimal compiler project is an attempt to make one of the simplest, 
+minimalistic languages that compiles to x86-64 assembly and machine code. Currently, the syntax is inspired by C-code with a little bit of influence from the Duck programming language. It is also modeled after Go and Objective-C to some extent. 
 
-The features of the language are at a top level based around variable declarations and function declarations.
+The features of the language are, at a top level, based around variable 
+declarations and function declarations.
 
-Types are provided after names with a trailing colon and the type name, followed by a semicolon to delimit statements.
+Types are provided after names, with a trailing colon and the type name, 
+followed by a semicolon to delimit statements.
 
 ####For example:
 
