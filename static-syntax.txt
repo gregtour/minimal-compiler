@@ -15,8 +15,6 @@
 <block> ::= <fstmt>
 <block> ::= { <fstmt*> }
 <type> ::= int
-<type> ::= string
-<type> ::= int [ ]
 <type> ::= void
 <fstmt*> ::= <fstmt> <fstmt*>
 <fstmt*> ::= <epsilon>
@@ -60,10 +58,8 @@
 <factor> ::= <final>
 <final> ::= ( <expr> )
 <final> ::= <identifier>
-<final> ::= <identifier> [ <expr> ]
 <final> ::= <identifier> ( <arg*> )
 <final> ::= <integer>
-<final> ::= <string>
 <final> ::= <boolean>
 <boolean> ::= true
 <boolean> ::= false
