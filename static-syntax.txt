@@ -20,7 +20,6 @@
 <fstmt*> ::= <epsilon>
 <fstmt> ::= <type-declaration> ;
 <fstmt> ::= <identifier> = <expr> ;
-<fstmt> ::= <identifier> [ <expr> ] = <expr> ;
 <fstmt> ::= <expr> ;
 <fstmt> ::= if ( <expr> ) <block> <else>
 <else> ::= else <block>
