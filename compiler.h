@@ -125,6 +125,8 @@ typedef struct FUNC_SEGMENT
 extern unsigned int  gPrgrmFunctionCount;
 extern FUNC_SEGMENT* gPrgrmFunctionTable;
 
+int CreateTemporaryRegister();
+
 /* Compiler Structures */
 
 extern SOURCE*   gPrgrmSources;
