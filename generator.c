@@ -2,6 +2,15 @@
 #include "compiler.h"
 
 
+int cur_temp_register = 0;
+
+int CreateTemporaryRegister()
+{
+    cur_temp_register++;
+    return cur_temp_register;
+}
+
+
 /*void GenerateCode(FILE* output, FUNC_SEGMENT* method)
 {
     STACKMACHINE m;
