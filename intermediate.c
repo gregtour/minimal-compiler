@@ -27,11 +27,11 @@ int GenerateIntermediateCode(FSTMT* statement, void* funcHeader)
     case PROD_FSTMT_TYPE_DECLARATION:
     {
         // empty section
-        PUSH_INST("NOP");
+        // PUSH_INST("NOP");
         break;
     }
     // <fstmt> ::= <identifier> = <expr> ;
-    case PROD_FSTMT_IDENTIFIER_A:
+    case PROD_FSTMT_IDENTIFIER:
     {
         // create assignment IR
         // locate identifier
@@ -39,22 +39,6 @@ int GenerateIntermediateCode(FSTMT* statement, void* funcHeader)
         EXPR* expr = (EXPR*)(statement->children[2]);
         GenerateExprIRCode(expr, segment);
         PUSH_INST("POP <identifier>");
-        break;
-    }
-    // <fstmt> ::= <identifier> [ <expr> ] = <expr> ;
-    case PROD_FSTMT_IDENTIFIER_B:
-    {
-        // calculate expr_a
-        // calculate expr_b
-        // store assignment
-        EXPR* expr = (EXPR*)(statement->children[2]);
-
-        PUSH_INST("PUSH $identifier");
-        GenerateExprIRCode(expr, segment);
-        PUSH_INST("ADD");
-        expr = (EXPR*)(statement->children[5]);
-        GenerateExprIRCode(expr, segment);
-        PUSH_INST("STORE");
         break;
     }
     // <fstmt> ::= <expr> ;
@@ -273,15 +257,6 @@ int GenerateExprIRCode(EXPR* expression, FUNC_SEGMENT* segment)
         PUSH_INST("NOT");
         break;
     }
-    case PROD_FINAL_ARRAY_INDEX:
-    {
-        EXPR* expr = (EXPR*)(expression->children[2]);
-        PUSH_INST("PUSH $identifier");
-        GenerateExprIRCode(expr, segment);
-        PUSH_INST("ADD");
-        PUSH_INST("LOAD");
-        break;
-    }
     case PROD_FINAL_FUNCTION_CALL:
     {
         //for each argument
@@ -299,7 +274,6 @@ int GenerateExprIRCode(EXPR* expression, FUNC_SEGMENT* segment)
     }
     case PROD_FINAL_IDENTIFIER:
     case PROD_FINAL_INTEGER:
-    case PROD_FINAL_STRING:
     default:
         // one of the following
         PUSH_INST("PUSH <variable>");

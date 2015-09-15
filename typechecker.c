@@ -127,34 +127,8 @@ void LinkSourceRoot(const char* sourceFile, SYNTAX_TREE** tree)
 TYPE DeriveType(TYPE_DECL* sourceExpression)
 {
     TYPE baseType;
-    baseType.basic = TYPE_VOID;
-    baseType.size = 4;
-
-    if (sourceExpression
-        && sourceExpression->token == SYMBOL_TYPE)
-    {
-        switch (sourceExpression->production)
-        {
-        case PROD_TYPE_INT_A:
-            baseType.basic = TYPE_INTEGER;
-            baseType.size = 4;
-            break;
-        case PROD_TYPE_STRING:
-            baseType.basic = TYPE_STRING;
-            baseType.size = 4;
-            break;
-        case PROD_TYPE_INT_B:
-            baseType.basic = TYPE_INT_ARRAY;
-            baseType.size = 4;
-            break;
-        case PROD_TYPE_VOID:
-            baseType.basic = TYPE_VOID;
-            baseType.size = 4;
-            break;
-        default:
-            CompilerError("Unknown type.");
-        }
-    }
+	baseType.basic = TYPE_INTEGER;
+	baseType.size = 4;
     return baseType;
 }
 
@@ -276,7 +250,7 @@ int StaticTypeChecking(FSTMT* statement, void* funcHeader)
         break;
     }
     // <fstmt> ::= <identifier> = <expr> ;
-    case PROD_FSTMT_IDENTIFIER_A:
+    case PROD_FSTMT_IDENTIFIER:
     {
         const char* identifier;
         VARLIST* assignee;
@@ -301,55 +275,6 @@ int StaticTypeChecking(FSTMT* statement, void* funcHeader)
         if (CheckExpressionType(assignee->type, expr, segment) != 0)
         {
             CompilerError("Incorrect type in assignment.");
-            return 1;
-        }
-        break;
-    }
-    // <fstmt> ::= <identifier> [ <expr> ] = <expr> ;
-    case PROD_FSTMT_IDENTIFIER_B:
-    {
-        const char* identifier;
-        VARLIST* assignee;
-        EXPR* expr;
-        EXPR* index;
-        TYPE integer;
-
-        Assert(statement->numChildren == 6);
-        Assert(statement->children);
-        Assert(statement->children[0] && statement->children[0]->string);
-
-        expr = (EXPR*)(statement->children[5]);
-        index = (EXPR*)(statement->children[2]);
-        identifier = statement->children[0]->string;
-
-        assignee = GetVariableFromList(segment->locals, identifier);
-        if (assignee == NULL) { assignee = GetVariableFromList(segment->params, identifier); }
-        if (assignee == NULL) { assignee = GetVariableFromList(gPrgrmVariables, identifier); }
-
-        if (assignee == NULL)
-        {
-            CompilerError("Assignment to undeclared array.");
-            return 1;
-        }
-
-        if (assignee->type.basic != TYPE_INT_ARRAY)
-        {
-            CompilerError("Error attempting to index non-array type.");
-            return 1;
-        }
-
-        integer.basic = TYPE_INTEGER;
-        integer.size = 4;
-
-        if (CheckExpressionType(integer, expr, segment) != 0)
-        {
-            CompilerError("Incorrect type in assignment.");
-            return 1;
-        }
-
-        if (CheckExpressionType(integer, index, segment) != 0)
-        {
-            CompilerError("Non-integer index used to access array.");
             return 1;
         }
         break;
@@ -528,14 +453,12 @@ int IsUnaryOperator(int productionNum)
 int IsStringOperation(int productionNum)
 {
     return (productionNum == PROD_ARITHMETIC_ADD
-        || productionNum == PROD_FINAL_ARRAY_INDEX
         || productionNum == PROD_FINAL_FUNCTION_CALL);
 }
 
 int IsArrayOperation(int productionNum)
 {
-    return (productionNum == PROD_FINAL_ARRAY_INDEX
-        || productionNum == PROD_FINAL_FUNCTION_CALL);
+    return (productionNum == PROD_FINAL_FUNCTION_CALL);
 }
 
 
@@ -695,50 +618,6 @@ int CheckExpressionType(TYPE type, EXPR* expr, FUNC_SEGMENT* segment)
         }
 
         return CheckExpressionType(integer, subExpr, segment);
-    }
-
-    // check array addressing //
-    if (expr->production == PROD_FINAL_ARRAY_INDEX)
-    {
-        // <final> ::= <identifier> [ <expr> ]
-        VARLIST* variable;
-        EXPR* arrayIndex;
-        const char* identifier;
-        TYPE intType;
-
-        identifier = expr->children[0]->string;
-        arrayIndex = (EXPR*)(expr->children[2]);
-
-        variable = GetVariableFromList(segment->locals, identifier);
-        if (variable == NULL) {
-            variable = GetVariableFromList(segment->params, identifier);
-        } 
-        if (variable == NULL) {
-            variable = GetVariableFromList(gPrgrmVariables, identifier);
-        }
-
-        if (variable == NULL)
-        {
-            CompilerError("Reference to undeclared variable.");
-            return 1;
-        }
-
-        if (variable->type.basic != TYPE_INT_ARRAY)
-        {
-            CompilerError("Using non-array type as an indexed array.");
-            return 1;
-        }
-
-        intType.basic = TYPE_INTEGER;
-        intType.size = 4;
-
-        if (CheckExpressionType(intType, arrayIndex, segment) != 0)
-        {
-            CompilerError("Using non-integer type as array index.");
-            return 1;
-        }
-
-        return (CanCoerceToType(type, intType));
     }
 
     // check function invocation //
