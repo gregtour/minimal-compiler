@@ -71,6 +71,8 @@ That is the current goal. The intended platforms are both 64-bit versions of Win
 
 ####Goals
 
+Performance.
+
 Support strongly typed, static first class functions with up and downward Funargs.
 
 Maintain a comprehensible stack and memory model.
