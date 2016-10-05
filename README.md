@@ -79,6 +79,8 @@ Be Turing complete.
 
 Exist on a level parallel with C.
 
+Prevent exceptional runtime behavior.
+
 ####Links
 
 http://www.animats.com/papers/languages/safearraysforc43.pdf
