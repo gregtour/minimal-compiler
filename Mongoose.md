@@ -57,7 +57,7 @@ Differences from ANSI C:
 
 Mongoose Primitive Types:
 
-  integers and strings
+  integers, doubles, and strings
   void (not used for declared variables)
   auto (lazy compiler trick)
 
