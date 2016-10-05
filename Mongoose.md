@@ -63,6 +63,8 @@ Mongoose Primitive Types:
 
 Mongoose Data Types:
 
+  single linked lists
+  double linked lists
   fixed-size arrays
   dynamically sized arrays
   
