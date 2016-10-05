@@ -68,3 +68,7 @@ printi (number : int) : void 0;
 ```
 
 That is the current goal. The intended platforms are both 64-bit versions of Windows and Linux, with potential support for 32-bit environments as well.
+
+####Links
+
+http://www.animats.com/papers/languages/safearraysforc43.pdf
